@@ -10,12 +10,19 @@ export function updateWord(word: Word, remembered: boolean): Word {
       interval: 1,
       easeFactor: 2.3,
       nextReviewDate: new Date(today.setDate(today.getDate() + 1)).toISOString(),
-    };
+    };  
   }
-
-  const newRepetitions = word.repetitions + 1;
-  const newEaseFactor = Math.max(1.3, word.easeFactor + 0.1); //stops easefactor from going very low
-  const newInterval = newRepetitions === 1 ? 1 : newRepetitions === 2 ? 3 : Math.round(word.interval * newEaseFactor);
+  
+  const newRepetitions = remembered ? word.repetitions + 1 : 0;
+  const newEaseFactor = remembered ? Math.max(1.3, word.easeFactor + 0.1) : 2.3;
+  const newInterval =
+    newRepetitions === 0
+      ? 1
+      : newRepetitions === 1
+      ? 1
+      : newRepetitions === 2
+      ? 3
+      : Math.round(word.interval * newEaseFactor);
 
   const nextReviewDate = new Date();
   nextReviewDate.setDate(today.getDate() + newInterval);
@@ -26,5 +33,12 @@ export function updateWord(word: Word, remembered: boolean): Word {
     easeFactor: newEaseFactor,
     interval: newInterval,
     nextReviewDate: nextReviewDate.toISOString(),
+    reviewHistory: [
+      ...(word.reviewHistory || []),
+      {
+        date: new Date().toISOString(),
+        result: remembered ? "pass" : "fail",
+      },
+    ],
   };
 }
